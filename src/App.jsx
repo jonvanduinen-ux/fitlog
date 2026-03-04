@@ -28,11 +28,18 @@ const EMPTY_FORM = () => ({
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function getWeekKey(date) {
-  const d = new Date(date);
+  // Always parse as local noon to avoid UTC timezone shift bugs
+  const d = (typeof date === "string" && date.length === 10)
+    ? new Date(date + "T12:00:00")
+    : new Date(date);
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(d.setDate(diff));
-  return monday.toISOString().split("T")[0];
+  d.setDate(diff);
+  // Format as YYYY-MM-DD in local time (not UTC)
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
 }
 function getWeekRange(weekKey, short = false) {
   const start = new Date(weekKey);
